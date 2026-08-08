@@ -1,0 +1,105 @@
+[
+  {
+    "id": "HH-GOA-2026-005",
+    "name": "MONKEY D LUFFY",
+    "handle": "@jane_dev",
+    "role": "AI / NEXTJS",
+    "builderClass": "SHIP MASTER",
+    "theme": "tropical",
+    "quote": "Shipping dApps at 4 AM from Palolem Beach 🏖️",
+    "avatar": "http://localhost:5000/uploads/avatar-1786220419092-687250494.webp",
+    "badges": [
+      "READY TO SHIP",
+      "COCONUT POWERED",
+      "SOLANA / RUST"
+    ],
+    "beachBag": [
+      "FLIP FLOPS",
+      "MATCHA"
+    ],
+    "createdAt": "2026-08-08T20:20:40.320Z"
+  },
+  {
+    "id": "HH-GOA-2026-004",
+    "name": "JANE DOE",
+    "handle": "@jane_dev",
+    "role": "AI / NEXTJS",
+    "builderClass": "SHIP MASTER",
+    "theme": "tropical",
+    "quote": "Shipping dApps at 4 AM from Palolem Beach 🏖️",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "badges": [
+      "READY TO SHIP",
+      "COCONUT POWERED",
+      "SOLANA / RUST"
+    ],
+    "beachBag": [
+      "FLIP FLOPS",
+      "MATCHA"
+    ],
+    "createdAt": "2026-08-08T20:18:35.028Z"
+  },
+  {
+    "id": "HH-GOA-2026-001",
+    "name": "ARJUN MEHTA",
+    "handle": "@arjun_code",
+    "role": "SOLANA / RUST",
+    "builderClass": "TERMINAL WIZARD",
+    "theme": "tropical",
+    "quote": "Shipping dApps at 4 AM from Palolem Beach 🏖️",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "badges": [
+      "READY TO SHIP",
+      "COCONUT POWERED",
+      "SOLANA / RUST"
+    ],
+    "beachBag": [
+      "LAPTOP",
+      "COCONUT",
+      "FLIP FLOPS"
+    ],
+    "createdAt": "2026-08-08T20:00:00.000Z"
+  },
+  {
+    "id": "HH-GOA-2026-002",
+    "name": "PRIYA SHARMA",
+    "handle": "@priya_ui",
+    "role": "FRONTEND / AI",
+    "builderClass": "PIXEL PUSHER",
+    "theme": "cyber",
+    "quote": "Making pixels swim in tropical neon gradients ✨",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    "badges": [
+      "READY TO SHIP",
+      "SHIPPED AT 4 AM",
+      "AI ALCHEMIST"
+    ],
+    "beachBag": [
+      "MATCHA",
+      "DESK MAT",
+      "SUNGLASSES"
+    ],
+    "createdAt": "2026-08-08T20:10:00.000Z"
+  },
+  {
+    "id": "HH-GOA-2026-003",
+    "name": "VIKRAM DAS",
+    "handle": "@vikram_ship",
+    "role": "FULLSTACK / DEPIN",
+    "builderClass": "SHIP MASTER",
+    "theme": "sunset",
+    "quote": "If it doesn't ship before sunset, it's not a hackathon product 🌴",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "badges": [
+      "SHIP MASTER",
+      "GOA SPECIAL",
+      "COCONUT POWERED"
+    ],
+    "beachBag": [
+      "TOWEL",
+      "SUNSCREEN",
+      "POWERBANK"
+    ],
+    "createdAt": "2026-08-08T20:15:00.000Z"
+  }
+]
