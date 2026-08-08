@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 export const CardModal = ({ card, cardRef, onClose, onViewGallery }) => {
   const [downloading, setDownloading] = useState(false);
@@ -7,19 +8,43 @@ export const CardModal = ({ card, cardRef, onClose, onViewGallery }) => {
 
   const handleDownloadPng = async () => {
     if (!cardRef || !cardRef.current) return;
+    setDownloading(true);
+
     try {
-      setDownloading(true);
+      // Primary Method: html-to-image with fontEmbedCSS bypassed to avoid SecurityError on external Google Fonts
       const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 2.5
+        cacheBust: false,
+        fontEmbedCSS: '',
+        pixelRatio: 2
       });
+
+      const fileName = `${card?.name ? card.name.replace(/\s+/g, '-').toLowerCase() : 'hh-goa-builder'}-card.png`;
       const link = document.createElement('a');
-      link.download = `${card.name || 'hh-goa-builder'}-card.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
-    } catch (err) {
-      console.error('Download error:', err);
-      alert('Could not export image directly. Try taking a screenshot!');
+    } catch (primaryErr) {
+      console.warn('html-to-image primary export warning, attempting html2canvas fallback:', primaryErr);
+      try {
+        // Fallback Method: html2canvas
+        const canvas = await html2canvas(cardRef.current, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          backgroundColor: null,
+          logging: false
+        });
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const fileName = `${card?.name ? card.name.replace(/\s+/g, '-').toLowerCase() : 'hh-goa-builder'}-card.png`;
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
+      } catch (fallbackErr) {
+        console.error('All PNG export methods failed:', fallbackErr);
+        alert('Could not export PNG automatically. Please take a screenshot of your card!');
+      }
     } finally {
       setDownloading(false);
     }
@@ -80,7 +105,7 @@ export const CardModal = ({ card, cardRef, onClose, onViewGallery }) => {
           <button
             onClick={handleDownloadPng}
             disabled={downloading}
-            className="w-full bg-sunny-yellow text-lush-green font-label-caps text-sm font-bold border-thick border-lush-green py-3.5 px-6 sticker-shadow flex items-center justify-center gap-2 hover:bg-surface-bright uppercase tracking-wider"
+            className="w-full bg-sunny-yellow text-lush-green font-label-caps text-sm font-bold border-thick border-lush-green py-3.5 px-6 sticker-shadow flex items-center justify-center gap-2 hover:bg-surface-bright uppercase tracking-wider disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-xl">download</span>
             {downloading ? 'GENERATING HIGH-RES PNG...' : 'DOWNLOAD PNG CARD'}
