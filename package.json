@@ -1,0 +1,10 @@
+{
+  "name": "hh-goa-2026-card-generator",
+  "version": "1.0.0",
+  "description": "Fullstack ID Card Generator for Hacker House Goa 2026",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "node backend/server.js"
+  }
+}

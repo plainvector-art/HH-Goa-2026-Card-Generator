@@ -20,59 +20,89 @@ const dataDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const cardsFilePath = path.join(dataDir, 'cards.json');
 
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-// Serve static uploaded files
-app.use('/uploads', express.static(uploadsDir));
-
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
+// In-memory cache for serverless environments (like Vercel)
+let memoryCards = [
+  {
+    id: "HH-GOA-2026-001",
+    name: "ARJUN MEHTA",
+    handle: "@arjun_code",
+    role: "SOLANA / RUST",
+    builderClass: "TERMINAL WIZARD",
+    theme: "tropical",
+    quote: "Shipping dApps at 4 AM from Palolem Beach 🏖️",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    badges: ["READY TO SHIP", "COCONUT POWERED", "SOLANA / RUST"],
+    beachBag: ["LAPTOP", "COCONUT", "FLIP FLOPS"],
+    createdAt: "2026-08-08T20:00:00.000Z"
   },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.png';
-    const uniqueName = `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, uniqueName);
+  {
+    id: "HH-GOA-2026-002",
+    name: "PRIYA SHARMA",
+    handle: "@priya_ui",
+    role: "FRONTEND / AI",
+    builderClass: "PIXEL PUSHER",
+    theme: "cyber",
+    quote: "Making pixels swim in tropical neon gradients ✨",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    badges: ["READY TO SHIP", "SHIPPED AT 4 AM", "AI ALCHEMIST"],
+    beachBag: ["MATCHA", "DESK MAT", "SUNGLASSES"],
+    createdAt: "2026-08-08T20:10:00.000Z"
+  },
+  {
+    id: "HH-GOA-2026-003",
+    name: "VIKRAM DAS",
+    handle: "@vikram_ship",
+    role: "FULLSTACK / DEPIN",
+    builderClass: "SHIP MASTER",
+    theme: "sunset",
+    quote: "If it doesn't ship before sunset, it's not a hackathon product 🌴",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    badges: ["SHIP MASTER", "GOA SPECIAL", "COCONUT POWERED"],
+    beachBag: ["TOWEL", "SUNSCREEN", "POWERBANK"],
+    createdAt: "2026-08-08T20:15:00.000Z"
   }
-});
+];
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-});
-
-// Helper functions for reading/writing card JSON store
-const getCardsFromFile = () => {
+// Load cards with disk fallback
+const getCards = () => {
   try {
-    if (!fs.existsSync(cardsFilePath)) return [];
-    const data = fs.readFileSync(cardsFilePath, 'utf8');
-    return JSON.parse(data || '[]');
-  } catch (error) {
-    console.error('Error reading cards file:', error);
-    return [];
+    if (fs.existsSync(cardsFilePath)) {
+      const data = fs.readFileSync(cardsFilePath, 'utf8');
+      const parsed = JSON.parse(data || '[]');
+      if (parsed.length > 0) memoryCards = parsed;
+    }
+  } catch (e) {
+    // Read-only filesystem or error, use memoryCards
   }
+  return memoryCards;
 };
 
-const saveCardsToFile = (cards) => {
+const saveCards = (cards) => {
+  memoryCards = cards;
   try {
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
     fs.writeFileSync(cardsFilePath, JSON.stringify(cards, null, 2), 'utf8');
-  } catch (error) {
-    console.error('Error saving cards file:', error);
+  } catch (e) {
+    // In serverless, writing to disk may be restricted
   }
 };
+
+// Memory upload fallback for Vercel
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 // API Endpoints
 
 // 1. Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', event: 'Hacker House Goa 2026', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', event: 'Hacker House Goa 2026', serverless: !!process.env.VERCEL, timestamp: new Date().toISOString() });
 });
 
 // 2. Fetch all cards
 app.get('/api/cards', (req, res) => {
-  let cards = getCardsFromFile();
+  let cards = getCards();
   const { search, builderClass } = req.query;
 
   if (search) {
@@ -94,7 +124,7 @@ app.get('/api/cards', (req, res) => {
 
 // 3. Get single card by ID
 app.get('/api/cards/:id', (req, res) => {
-  const cards = getCardsFromFile();
+  const cards = getCards();
   const card = cards.find((c) => c.id === req.params.id);
   if (!card) {
     return res.status(404).json({ error: 'Card not found' });
@@ -110,7 +140,7 @@ app.post('/api/cards', (req, res) => {
     return res.status(400).json({ error: 'Name is required' });
   }
 
-  const cards = getCardsFromFile();
+  const cards = getCards();
   const cardIdNumber = (cards.length + 1).toString().padStart(3, '0');
   const newCard = {
     id: `HH-GOA-2026-${cardIdNumber}`,
@@ -126,36 +156,38 @@ app.post('/api/cards', (req, res) => {
     createdAt: new Date().toISOString()
   };
 
-  cards.unshift(newCard); // latest first
-  saveCardsToFile(cards);
+  cards.unshift(newCard);
+  saveCards(cards);
 
   res.status(201).json({ message: 'Card generated successfully!', card: newCard });
 });
 
-// 5. Upload Avatar Image
+// 5. Upload Avatar Image (returns Base64 Data URL for universal compatibility across Vercel)
 app.post('/api/upload', upload.single('avatar'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file uploaded' });
   }
-  const fileUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`;
-  res.json({ message: 'Upload successful', url: fileUrl, filename: req.file.filename });
+  const mimeType = req.file.mimetype || 'image/png';
+  const base64Image = req.file.buffer.toString('base64');
+  const dataUrl = `data:${mimeType};base64,${base64Image}`;
+  res.json({ message: 'Upload successful', url: dataUrl });
 });
 
 // 6. Delete card
 app.delete('/api/cards/:id', (req, res) => {
-  let cards = getCardsFromFile();
+  let cards = getCards();
   const initialLen = cards.length;
   cards = cards.filter((c) => c.id !== req.params.id);
   if (cards.length === initialLen) {
     return res.status(404).json({ error: 'Card not found' });
   }
-  saveCardsToFile(cards);
+  saveCards(cards);
   res.json({ message: 'Card deleted successfully' });
 });
 
 // 7. Get aggregate stats
 app.get('/api/stats', (req, res) => {
-  const cards = getCardsFromFile();
+  const cards = getCards();
   const totalBuilders = cards.length;
 
   const classCount = {};
@@ -171,6 +203,11 @@ app.get('/api/stats', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🌴 HH Goa 2026 Backend running on http://localhost:${PORT}`);
-});
+// Start listening when executed directly locally
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🌴 HH Goa 2026 Backend running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
